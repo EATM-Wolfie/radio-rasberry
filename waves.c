@@ -1,40 +1,74 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <dirent.h> 
+#include <dirent.h>
+#include <unistd.h> 
 #include <time.h>
 #include <wiringPi.h>
 
+//hello
 
+
+char cmd [512];
+void playATune();
+void doRandomLoop();
 char * RandomFile();
 #define LedPin 2
+
+
+
+// this page shows the poutputs https://www.digikey.com/en/maker/blogs/2019/how-to-use-gpio-on-the-raspberry-pi-with-c
 
 int main()
 {
 
-srand ( time(NULL) );
+    srand ( time(NULL) );
     printf("Hello, World! \n");
- 
+   // if(wiringPiSetup() == -1) 
+   // { 
+   //     //when initialize wiringPi failed, print message to screen
+   //     printf("setup wiringPi failed !\n");
+   //     return -1;
+   // }
 
-    printf ("----\n\n\n\n");
+    printf ("Down here");
+    doRandomLoop();
+    return 0;
+}
+
+void doRandomLoop()
+{
     char * fileName;
-    fileName = RandomFile ();
-    //RandomFile();
-    // char outputName[1024];
-    // strcpy (outputName, fileName);
-    char cmd [512];
+
+
+    while ( 1 == 1)
+    {
+                fileName = RandomFile ();
     sprintf(cmd,"mpg321 ./files/%s",fileName);
     printf ("Command to run: %s",cmd);
-    
-    printf ("file to pick is %s\n\n", fileName);
-    if(wiringPiSetup() == -1) 
-    { 
-        //when initialize wiringPi failed, print message to screen
-        printf("setup wiringPi failed !\n");
-        return -1;
+        char * fname;
+        sprintf(fname, "/home/pi/src/kill.me");
+        if( access( fname, F_OK ) != -1 ) 
+        {
+        // file exists - return.
+        return;
+        } 
+      //  for (int i =0 ; i< 10; i++)
+        {
+            if (digitalRead (2) == 1)
+            {
+                printf ("someone have done pin %d", 2);
+                //playATune(); 
+            }
+        }
+        sleep(5);
     }
+}
 
-    pinMode(LedPin, OUTPUT);
+void playATune()
+{
+    printf ("Ooh SOmeone must have stepped in fromt of the PIR\r\nI'm going to play a song");
+    pinMode(LedPin, OUTPUT);segmentation fault checker online
     digitalWrite(LedPin, LOW);   //led on
     printf("led on\n");
     system ("amixer set PCM 100%");
@@ -44,10 +78,7 @@ srand ( time(NULL) );
     digitalWrite(LedPin, HIGH);  //led off
     printf("led off\n");
     printf("All Done\n");
-    return 0;
 }
-
-
 
 char  * RandomFile ()
 {
