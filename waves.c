@@ -13,7 +13,8 @@ char cmd [512];
 void playATune();
 void doRandomLoop();
 char * RandomFile();
-#define LedPin 2
+#define LedPin 2     //GPIO2 Physical Pin 13. this goes LOW when active and HIGH when inactive. (so go from 5v (Physical Pin 2) via a 33 ohm resistor to pin 13 for a cct.)
+#define triggerPin 4 //GPIO4 Physical pin 16. This has to be shorted to 5v to activate. Use Physical pin 2 for the 5v.
 
 
 
@@ -22,70 +23,66 @@ char * RandomFile();
 int main()
 {
 
-    srand ( time(NULL) );
-    printf("Hello, World! \n");
-   // if(wiringPiSetup() == -1) 
-   // { 
-   //     //when initialize wiringPi failed, print message to screen
-   //     printf("setup wiringPi failed !\n");
-   //     return -1;
-   // }
+    srand ( time(0) );
+    printf("Program Started!\n");
+    if(wiringPiSetup() == -1) 
+    { 
+      //when initialize wiringPi failed, print message to screen
+      printf("setup wiringPi failed !\n");
+      return -1;
+    }
+   //set up the pins for input and output
+    
+   pinMode(LedPin, OUTPUT);
+   pinMode(triggerPin, INPUT);
 
-    printf ("Down here");
-    doRandomLoop();
-    return 0;
-}
-
-void doRandomLoop()
-{
-    char * fileName;
-
-
-    while ( 1 == 1)
+    //a file what you put in to stop execution
+    char fname [64];;
+    
+    sprintf(fname, "/home/pi/src/kill.me");
+    
+    //main loop    
+    while (1)
     {
-                fileName = RandomFile ();
-    sprintf(cmd,"mpg321 ./files/%s",fileName);
-    printf ("Command to run: %s",cmd);
-        char * fname;
-        sprintf(fname, "/home/pi/src/kill.me");
         if( access( fname, F_OK ) != -1 ) 
         {
         // file exists - return.
-        return;
+        printf ("Leaving the Program");
+        break;
         } 
-      //  for (int i =0 ; i< 10; i++)
+        if (digitalRead (triggerPin) == HIGH)
         {
-            if (digitalRead (2) == 1)
-            {
-                printf ("someone have done pin %d", 2);
-                //playATune(); 
-            }
+            playATune();
         }
-        sleep(5);
+        sleep (1);
     }
+    return 0;
 }
+
+
+
 
 void playATune()
 {
-    printf ("Ooh SOmeone must have stepped in fromt of the PIR\r\nI'm going to play a song");
-    pinMode(LedPin, OUTPUT);segmentation fault checker online
+    printf ("PIR Sensor pin triggered\n");
     digitalWrite(LedPin, LOW);   //led on
-    printf("led on\n");
     system ("amixer set PCM 100%");
+    char * fileName = RandomFile();
+    printf ("Filename=%s", fileName);
     //calculate the command line
+    sprintf(cmd,"mpg321 ./files/%s",fileName);
 
     system(cmd);
     digitalWrite(LedPin, HIGH);  //led off
-    printf("led off\n");
-    printf("All Done\n");
+    printf ("Leaving function that plays a song\n");
 }
 
-char  * RandomFile ()
+
+char * RandomFile ()
 {
     //generate a random number
-    int randomnumber;
+    int randomnumber =1;
     randomnumber = rand() % 100;
-
     //get the number of files in the folder
     int filecount;
     filecount =0;
@@ -96,7 +93,7 @@ char  * RandomFile ()
     {
         while ((dir = readdir(d)) != NULL) 
         {
-            //printf("FILE: %d = %s\n", filecount, dir->d_name);
+//            printf("FILE: %d = %s\n", filecount, dir->d_name);
             filecount++;
         }
     }
@@ -110,22 +107,15 @@ char  * RandomFile ()
     fileNumber = randomnumber % filecount;
     closedir(d);
     d=opendir("./files");
-
     //now get the nth file and return the filename
     for (int i = 0; i<= fileNumber; i++)
     {
         dir = readdir(d);
 
     }
-
-
     char * fName;
     fName = dir->d_name;
     closedir(d);
-  
-
-
-
     return fName;
 
 }
