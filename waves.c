@@ -50,9 +50,10 @@ int main()
         printf ("Leaving the Program");
         break;
         } 
-        if (digitalRead (triggerPin) == HIGH)
+        if (digitalRead (triggerPin) == LOW)
         {
             playATune();
+            sleep (60000);
         }
         sleep (1);
     }
@@ -68,7 +69,7 @@ void playATune()
     digitalWrite(LedPin, LOW);   //led on
     system ("amixer set PCM 100%");
     char * fileName = RandomFile();
-    printf ("Filename=%s", fileName);
+    printf ("Filename=%s\n\n", fileName);
     //calculate the command line
     sprintf(cmd,"mpg321 ./files/%s",fileName);
 
@@ -109,9 +110,9 @@ char * RandomFile ()
     d=opendir("./files");
     //now get the nth file and return the filename
     for (int i = 0; i<= fileNumber; i++)
-    {
+    {    
         dir = readdir(d);
-
+        
     }
     char * fName;
     fName = dir->d_name;
