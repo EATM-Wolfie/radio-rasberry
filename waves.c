@@ -91,9 +91,10 @@ int main()
         printf ("Leaving the Program");
         break;
         } 
-        if (digitalRead (triggerPin) == HIGH)
+        if (digitalRead (triggerPin) == LOW)
         {
             playATune();
+            sleep (60000);
         }
         sleep (1);
     }
