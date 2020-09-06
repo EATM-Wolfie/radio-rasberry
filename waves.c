@@ -8,6 +8,9 @@
 
 //hello
 
+//the file names and total files
+char  files [128] [64];
+int filecount = 0;
 
 char cmd [512];
 void playATune();
@@ -19,12 +22,50 @@ char * RandomFile();
 
 
 // this page shows the poutputs https://www.digikey.com/en/maker/blogs/2019/how-to-use-gpio-on-the-raspberry-pi-with-c
+void GetDirContents()
+{
+DIR *d;
+    struct dirent *dir;
+    d = opendir("./files");
+    if (d)
+    {
+        while ((dir = readdir(d)) != NULL) 
+        {
 
+            if (dir->d_name[0] != '.')
+            {
+                if (filecount > 64) break;
+                strcpy (files[filecount], dir->d_name);
+                filecount++;
+
+            }
+            
+        }
+    }
+    else
+    {
+        printf ("the ./files/ folder is missing");
+    }
+    //print a list to the user so they can see what is going on
+    printf ("List of files generated\n");
+    printf ("=======================\n");
+    for (int i =0 ; i<filecount; i++)
+    {
+        printf ("File number %d is %s\n", i, files[i]);
+
+    }
+    printf ("-----------------------\n");
+
+
+}
 int main()
 {
 
+
     srand ( time(0) );
     printf("Program Started!\n");
+    //go get the array of files which can be played
+    GetDirContents();
     if(wiringPiSetup() == -1) 
     { 
       //when initialize wiringPi failed, print message to screen
@@ -50,10 +91,9 @@ int main()
         printf ("Leaving the Program");
         break;
         } 
-        if (digitalRead (triggerPin) == LOW)
+        if (digitalRead (triggerPin) == HIGH)
         {
             playATune();
-            sleep (60000);
         }
         sleep (1);
     }
@@ -69,10 +109,10 @@ void playATune()
     digitalWrite(LedPin, LOW);   //led on
     system ("amixer set PCM 100%");
     char * fileName = RandomFile();
-    printf ("Filename=%s\n\n", fileName);
+    printf ("Filename=%s", fileName);
     //calculate the command line
     sprintf(cmd,"mpg321 ./files/%s",fileName);
-
+    //printf ("temp suspend plauing file: %s\n", cmd);
     system(cmd);
     digitalWrite(LedPin, HIGH);  //led off
     printf ("Leaving function that plays a song\n");
@@ -83,40 +123,20 @@ char * RandomFile ()
 {
     //generate a random number
     int randomnumber =1;
-    randomnumber = rand() % 100;
+    randomnumber = rand() % filecount;
     //get the number of files in the folder
-    int filecount;
-    filecount =0;
-    DIR *d;
-    struct dirent *dir;
-    d = opendir("./files");
-    if (d)
-    {
-        while ((dir = readdir(d)) != NULL) 
-        {
-//            printf("FILE: %d = %s\n", filecount, dir->d_name);
-            filecount++;
-        }
-    }
-    else
-    {
-        printf ("the ./files/ folder is missing");
-    }
-    
-    filecount = filecount -2; //for the . and .. directories which show
-    int fileNumber;
-    fileNumber = randomnumber % filecount;
-    closedir(d);
-    d=opendir("./files");
     //now get the nth file and return the filename
-    for (int i = 0; i<= fileNumber; i++)
-    {    
-        dir = readdir(d);
-        
+    int tempNumber = 0;
+    for (int i = 0; i<= randomnumber; i++)
+    {
+        tempNumber++;
+        if (tempNumber >= filecount) tempNumber=0;
     }
+
     char * fName;
-    fName = dir->d_name;
-    closedir(d);
+    fName = files [tempNumber];
+    printf ("=====================================\n");
+    printf ("Random Number = %d. Number picked = %d, name=%s\n", randomnumber, tempNumber, fName);
     return fName;
 
 }
