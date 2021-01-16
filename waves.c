@@ -83,6 +83,7 @@ int main()
     sprintf(fname, "/home/pi/src/kill.me");
     
     //main loop    
+    printf("About To Go Into Main Loop");
     while (1)
     {
         if( access( fname, F_OK ) != -1 ) 
@@ -91,12 +92,13 @@ int main()
         printf ("Leaving the Program");
         break;
         } 
+        printf ("triggerPin=%d", digitalRead(triggerPin));
         if (digitalRead (triggerPin) == LOW)
         {
             playATune();
             sleep (60000);
         }
-        sleep (1);
+        sleep (1000);
     }
     return 0;
 }
