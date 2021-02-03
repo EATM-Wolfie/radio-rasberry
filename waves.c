@@ -14,11 +14,14 @@ int filecount = 0;
 
 char cmd [512];
 void playATune();
+void cls();         //clears the screen
+void doHome();      //puts cursor at home position
 void doRandomLoop();
 char * RandomFile();
 #define LedPin 2     //GPIO2 Physical Pin 13. this goes LOW when active and HIGH when inactive. (so go from 5v (Physical Pin 2) via a 33 ohm resistor to pin 13 for a cct.)
 #define triggerPin 4 //GPIO4 Physical pin 16. This has to be shorted to 5v to activate. Use Physical pin 2 for the 5v.
-
+//contradictory information.
+//Use PIN2 (5v and PIN 16 [which says GPIO23])
 
 
 // this page shows the poutputs https://www.digikey.com/en/maker/blogs/2019/how-to-use-gpio-on-the-raspberry-pi-with-c
@@ -63,7 +66,6 @@ int main()
 
 
     srand ( time(0) );
-    printf("Program Started!\n");
     //go get the array of files which can be played
     GetDirContents();
     if(wiringPiSetup() == -1) 
@@ -72,37 +74,65 @@ int main()
       printf("setup wiringPi failed !\n");
       return -1;
     }
-   //set up the pins for input and output
-    
-   pinMode(LedPin, OUTPUT);
-   pinMode(triggerPin, INPUT);
-
+    pinMode(triggerPin, INPUT);
     //a file what you put in to stop execution
     char fname [64];;
     
     sprintf(fname, "/home/pi/src/kill.me");
     
     //main loop    
-    printf("About To Go Into Main Loop");
+    cls();
     while (1)
     {
         if( access( fname, F_OK ) != -1 ) 
         {
-        // file exists - return.
-        printf ("Leaving the Program");
-        break;
+            // file exists - return.
+            printf ("Leaving the Program\n");
+            break;
         } 
-        printf ("triggerPin=%d", digitalRead(triggerPin));
-        if (digitalRead (triggerPin) == LOW)
-        {
-            playATune();
-            sleep (60000);
-        }
-        sleep (1000);
+       
+         if (digitalRead (triggerPin) == 0)
+         {
+             cls();
+             printf("Going to play a song\n");
+             playATune();
+             cls();
+             for (int i=10; i>0 ; i--)
+             {
+                 printf ("Just waiting %d secs before entering loop again  ", i);
+                 fflush(stdout);
+                 sleep (1);
+                 doHome();
+             }
+             cls();
+         }
+         else
+         {
+             doHome();
+             time_t rawtime;
+             struct tm * timeinfo;
+             time (&rawtime);
+             timeinfo = localtime ( &rawtime);
+             printf ("Waiting for movement\n\n\n%s\n", asctime(timeinfo));
+             
+         }
+        sleep (1);
     }
     return 0;
 }
 
+void doHome()
+{
+    printf ("\033[H");
+    fflush(stdout);
+             
+}
+
+void cls()
+{
+             printf ("\033[2J\033[H");
+             fflush(stdout);
+}
 
 
 
