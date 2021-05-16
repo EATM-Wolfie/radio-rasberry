@@ -37,15 +37,15 @@ Write this script and save as ```/etc/systemd/system/radio.service```
     
 Once done, run the following commands
 
-        systemctl daemon-reload
-        systemctl start radio
-        systemctl status radio
+    systemctl daemon-reload
+    systemctl start radio
+    systemctl status radio
         
 The last command will show you if it is running OK
 
 if you want it so the service is enabled on power up (even before login), run
 
-        systemcrl enable radio
+        systemctl enable radio
         
 You have to do all of these as ```sudo```
 
