@@ -14,6 +14,10 @@ this must go into the following path: ```/home/pi/src/radio-rasberry``` (Note th
 
 to run this as a service the path of the program has to be correct!
 
+## The service script.
+
+Write this script and save as ```/etc/systemd/system/radio.service```
+
     #The service script
 
 
@@ -29,3 +33,20 @@ to run this as a service the path of the program has to be correct!
 
     [Install]
     WantedBy=multi-user.target
+    
+    
+Once done, run the following commands
+
+        systemctl daemon-reload
+        systemctl start radio
+        systemctl status radio
+        
+The last command will show you if it is running OK
+
+if you want it so the service is enabled on power up (even before login), run
+
+        systemcrl enable radio
+        
+You have to do all of these as ```sudo```
+
+
