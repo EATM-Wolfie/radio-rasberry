@@ -45,7 +45,7 @@ The last command will show you if it is running OK
 
 if you want it so the service is enabled on power up (even before login), run
 
-        systemctl enable radio
+    systemctl enable radio
         
 You have to do all of these as ```sudo```
 
